@@ -82,7 +82,7 @@ class GraficoTabella extends Breeze
     public function save(array $options = [])
     {
         $html = "<div ";
-        $attrs = json_decode($this->attributes['attributes'],true);
+        $attrs = json_decode(Arr::get($this->attributes,'attributes','[]'),true);
         foreach ($attrs as $key => $attr) {
             $html .= "$key=\"$attr\" ";
         }

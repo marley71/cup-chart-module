@@ -9,6 +9,7 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 
 class CreaImportazioneJson extends Command
 {
@@ -71,7 +72,7 @@ class CreaImportazioneJson extends Command
         }
 
         try {
-
+            Log::info('CreaImportazioneJson', ['importazioneId' => $importazioneId]);
             $this->importazioneService = new ElasticJsonService($importazione);
 
 
@@ -81,7 +82,9 @@ class CreaImportazioneJson extends Command
             }
             $lastSheetCode = null;
             $prog = 1;
+            Log::info('importazione->tabelle', ['importazione->tabelle' => $importazione->tabelle]);
             foreach ($importazione->tabelle as $tabella) {
+                Log::info('tabella', ['tabella' => $tabella]);
                 $metadata = json_decode($tabella->metadata,true);
                 $json = $this->importazioneService->getTableJson($tabella->sheetname, $tabella->nome, $metadata);
 

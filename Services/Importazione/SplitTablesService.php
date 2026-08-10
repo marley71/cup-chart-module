@@ -13,6 +13,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
@@ -119,7 +120,10 @@ class SplitTablesService
                 $dataType = $cell->getDataType();
                 $rawValue = $cell->getValue();
                 $formattedValue = $cell->getFormattedValue();
-                if ($dataType == 's' && Str::startsWith($rawValue, 'MD:')) {
+                if (in_array($cell->getDataType(), [
+                    DataType::TYPE_STRING,
+                    DataType::TYPE_INLINE,
+                ], true) && Str::startsWith($rawValue, 'MD:')) {
 
                     //FORMATO RICHIESTO:
                     //
@@ -236,7 +240,10 @@ class SplitTablesService
             $metadataColumn = Coordinate::stringFromColumnIndex($metadataColumnIndex);
             $coordinate = $metadataColumn . $row;
             $cell = $sheet->getCell($coordinate);
-            if (!$cell->getDataType() == 's') {
+            if (!in_array($cell->getDataType(), [
+                DataType::TYPE_STRING,
+                DataType::TYPE_INLINE,
+            ], true)) {
                 continue;
             }
             if ($cell->isMergeRangeValueCell()) {

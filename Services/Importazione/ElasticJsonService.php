@@ -10,8 +10,10 @@
 use App\Models\Importazione;
 use App\Models\ImportazioneTabella;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
@@ -177,6 +179,7 @@ class ElasticJsonService
         $maxColumnIndex = Arr::get($sheetInfo, 'lastColumnIndex', 0);
         $totalRows = Arr::get($sheetInfo, 'totalRows', 0);
         $previousFinalRow = 0;
+        Log::info('getTablesFromSheet', ['sheetInfo' => $sheetInfo]);
         for ($i = 1; $i <= Arr::get($sheetInfo, 'totalColumns', 0); $i++) {
 
             $column = Coordinate::stringFromColumnIndex($i);
@@ -188,7 +191,11 @@ class ElasticJsonService
                 $dataType = $cell->getDataType();
                 $rawValue = $this->getCalcValue($cell);
                 $formattedValue = $cell->getFormattedValue();
-                if ($dataType == 's' && Str::startsWith($rawValue, 'MD:')) {
+                Log::info('getTablesFromSheet', ['coordinate' => $coordinate, 'rawValue' => $rawValue, 'formattedValue' => $formattedValue]);
+                if (in_array($cell->getDataType(), [
+                    DataType::TYPE_STRING,
+                    DataType::TYPE_INLINE,
+                ], true) && Str::startsWith($rawValue, 'MD:')) {
 
                     //FORMATO RICHIESTO:
                     //
@@ -305,7 +312,10 @@ class ElasticJsonService
             $metadataColumn = Coordinate::stringFromColumnIndex($metadataColumnIndex);
             $coordinate = $metadataColumn . $row;
             $cell = $sheet->getCell($coordinate);
-            if (!$cell->getDataType() == 's') {
+            if (!in_array($cell->getDataType(), [
+                DataType::TYPE_STRING,
+                DataType::TYPE_INLINE,
+            ], true)) {
                 continue;
             }
             if ($cell->isMergeRangeValueCell()) {

@@ -14,6 +14,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
@@ -120,6 +121,7 @@ class SplitStrictTablesService
         $maxColumnIndex = Arr::get($sheetInfo, 'lastColumnIndex', 0);
         $totalRows = Arr::get($sheetInfo, 'totalRows', 0);
         $previousFinalRow = 0;
+        Log::info('getTablesFromSheet', ['sheetInfo' => $sheetInfo]);
         for ($i = 1; $i <= Arr::get($sheetInfo, 'totalColumns', 0); $i++) {
 
             $column = Coordinate::stringFromColumnIndex($i);
@@ -131,8 +133,12 @@ class SplitStrictTablesService
                 $dataType = $cell->getDataType();
                 $rawValue = $cell->getValue();
                 $formattedValue = $cell->getFormattedValue();
-                if ($dataType == 's' && Str::startsWith($rawValue, 'MD:')) {
-
+                Log::info('getTablesFromSheet', ['coordinate' => $coordinate, 'rawValue' => $rawValue, 'formattedValue' => $formattedValue, 'dataType' => $dataType]);
+                if (in_array($cell->getDataType(), [
+                    DataType::TYPE_STRING,
+                    DataType::TYPE_INLINE,
+                ], true) && Str::startsWith($rawValue, 'MD:')) {
+                    Log::info('TROVATO MD');
                     //FORMATO RICHIESTO:
                     //
                     //  MD:<NROWS>R:<NCOLUMNS>C
@@ -357,7 +363,10 @@ class SplitStrictTablesService
             $metadataColumn = Coordinate::stringFromColumnIndex($metadataColumnIndex);
             $coordinate = $metadataColumn . $row;
             $cell = $sheet->getCell($coordinate);
-            if (!$cell->getDataType() == 's') {
+            if (!in_array($cell->getDataType(), [
+                DataType::TYPE_STRING,
+                DataType::TYPE_INLINE,
+            ], true)) {
                 continue;
             }
             if ($cell->isMergeRangeValueCell()) {
@@ -415,7 +424,7 @@ class SplitStrictTablesService
         $initColumnIndexTop = $initColumnIndex + $headersColumns;
 
         $mergeCellsFromSheet = $sheet->getMergeCells();
-
+        Log::info("MERGE CELLS FROM SHEET::: " . print_r($mergeCellsFromSheet,true));
         $mergeCells = [];
         foreach ($mergeCellsFromSheet as $mergeCell) {
             list($key, $value) = explode(':', $mergeCell);
@@ -601,6 +610,10 @@ class SplitStrictTablesService
             $valuesSeries = $series[$values];
 
             $nameValues = array_map('trim',array_map('strtolower',array_values($namesSeries['values'])));
+            Log::info("SERIES::: " . print_r($series,true));
+            Log::info("NAMES SERIES::: " . print_r($namesSeries,true));
+            Log::info("VALUES SERIES::: " . print_r($valuesSeries,true));
+            Log::info("NAME VALUES::: " . print_r($nameValues,true));
             if (count($nameValues) !== 1) {
                 throw new \Exception("Le serie con i nomi devono avere un unico valore distinto\n" . print_r($nameValues,true));
             }
@@ -676,6 +689,7 @@ class SplitStrictTablesService
         $topSeries = [];
 
         $nSerie = 1;
+        Log::info("HEADERS::: " . print_r($headers,true));
         foreach ($headers as $row => $columnVals) {
             $topSerie = [
                 'type' => 'top',

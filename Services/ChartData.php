@@ -375,8 +375,13 @@ class ChartData
 
             }
         }
-
-        $result['range'] = $this->_calcolaIntervalli($seriesValues);
+        //Log::info("count " . count($values) . " " . print_r($values,1));
+        $quantiliValues = [];
+        foreach ($values[$subKey] as $key => $val) {
+            $quantiliValues[] = $val['total'];
+        }
+        //Log::info(print_r($quantiliValues,1));
+        $result['range'] = $this->_calcolaIntervalli($subKey,$quantiliValues);
         $result['filtersContext'] = $this->filtersContext;
         $result['seriesContext'] = $this->seriesContext;
         $result['measureName'] = $mapKey;
@@ -734,7 +739,25 @@ class ChartData
         return $result;
     }
 
-    protected function _calcolaIntervalli($seriesValues)
+    protected function _calcolaIntervalli($key,$seriesValues)
+    {
+        $interval = [];
+
+
+        sort($seriesValues);
+        Log::info("serievalues sorted" . print_r($seriesValues,1));
+        $quartile = intval(count($seriesValues) / 5);
+        Log::info("quartile $quartile");
+        $interval[$key] = [];
+        $interval[$key][] = $seriesValues[$quartile];
+        $interval[$key][] = $seriesValues[$quartile*2];
+        $interval[$key][] = $seriesValues[$quartile*3];
+        $interval[$key][] = $seriesValues[$quartile*4];
+        Log::info("range" . print_r($interval,1));
+        return $interval;
+    }
+
+    protected function _calcolaIntervalliOld($seriesValues)
     {
         $interval = [];
 
@@ -788,10 +811,12 @@ class ChartData
             $ciSeries[strtolower(trim($k))] = $k;
         }
         $config = config('cupparis-chart.sinonimi_tipo_geografico',[]);
+        $keySearched = [];
         foreach ($config as $cKey => $cValidKeys) {
             //echo "$cKey " . print_r($cValidKeys,true);
             foreach ($cValidKeys as $key) {
                 //echo " cerco " . strtolower(trim($key)) . " nel vettore " . print_r($ciSeries,true);
+                $keySearched[] = $key;
                 if (Arr::exists($ciSeries,strtolower(trim($key)))) {
                     $this->mapOptions = [
                         'mode' => $cKey,
@@ -803,7 +828,7 @@ class ChartData
             }
             //echo "----\n";
         }
-        throw new \Exception('La mappa non ha una key riconosciuta come key geografica');
+        throw new \Exception('La mappa non ha una key riconosciuta come key geografica ' . join(',',$keySearched));
 
 
 //        if (array_key_exists('comune', $leftSeries)) {

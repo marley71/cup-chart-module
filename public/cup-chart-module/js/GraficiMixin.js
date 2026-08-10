@@ -56,18 +56,14 @@ const GraficiMixin = {
         enableMultiSelect() {
             var that = this;
             for (var k in that.leftContext) {
-                var key = k.toLowerCase();
-                if (that.isMultidimensionale('left',key)) {
-                    //var key = k;
-
+                var keyglob = k.toLowerCase();
+                if (that.isMultidimensionale('left',keyglob)) {
+                    const key = keyglob;
+                    
                     jQuery('select[name="' + key + '"]').addClass('d-none');
                     jQuery('select[name="' + key + '"]').multiselect({
                         onChange: function(option, checked, select) {
                             console.log('key',key,checked,select,option.val());
-
-
-
-
                             if (checked)
                                 that.filters[key].push(option.val());
                             else {

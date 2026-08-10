@@ -79,7 +79,7 @@ class ManageImportazione extends Command
 
             $importazioneData = $importazione->data;
             $sheets = Arr::get($importazioneData, 'sheets', []);
-
+            Log::info('sheets', ['sheets' => $sheets]);
             foreach ($sheets as $sheetName => $sheetInfo) {
                 Log::info("SHEET::: ".$sheetName);
                 $importazioneData['sheets'][$sheetName]['nTables'] = $this->importazioneService->getTablesFromSheet($sheetName,

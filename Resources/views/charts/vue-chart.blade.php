@@ -38,7 +38,14 @@
                     <ul class="list-group overflow-auto border-none dpa-chart">
 
                         <li v-for="(serieContext,serieName) in seriesContext" class="list-group-item pt-3 pb-4" :key="serieName">
-                            <h6 class="text-center mb-2 pb-1 border-bottom">@{{serieName}}</h6>
+                            <h6 class="text-center mb-2 pb-1 border-bottom">
+                                <span  v-if="isMultidimensionale('top',serieName)" title="lascia selezionato solo un valore">
+                                    <button style="font-size: 0.7rem;" class="btn btn-sm btn-outline-success py-0 px-1 m-0" v-on:click="deselezionaTutto(serieName)">
+                                        <span class="text-italic" >-</span>
+                                    </button>&nbsp;
+                                    @{{serieName}}
+                                </span>
+                            </h6>
                             <template v-if="isMultidimensionale('top',serieName)">
                                 <div v-if="Object.keys(serieContext.domainValues).length == 1">
                                     @{{Object.values(serieContext.domainValues)[0]}}
@@ -152,6 +159,12 @@
                 return mergedData;
             },
             methods : {
+                deselezionaTutto(serieName) {
+                    var that = this;
+                    let first = that.series[serieName][0]
+                    that.series[serieName] = [first];
+                    that.load();
+                },
                 imageData() {
                     return this.chart.getImageURI();
                 },

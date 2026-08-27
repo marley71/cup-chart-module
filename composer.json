@@ -20,7 +20,7 @@
         "php": "^8.2",
         "elasticsearch/elasticsearch": "~7.0",
         "laravel/framework": "^12.0",
-        "phpoffice/phpspreadsheet": "1.*",
+        "phpoffice/phpspreadsheet": "^5.0",
         "dataninja/geo-shapes": "master-dev"
     },
     "extra": {

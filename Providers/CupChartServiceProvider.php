@@ -3,7 +3,7 @@
 namespace Modules\CupChart\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Database\Eloquent\Factory;
+//use Illuminate\Database\Eloquent\Factory;
 
 class CupChartServiceProvider extends ServiceProvider
 {
@@ -93,9 +93,10 @@ class CupChartServiceProvider extends ServiceProvider
      */
     public function registerFactories()
     {
-        if (! app()->environment('production') && $this->app->runningInConsole()) {
-            app(Factory::class)->load(module_path('CupChart', 'Database/factories'));
-        }
+        // TODO: in laravel 12, the factories are not used anymore
+        // if (! app()->environment('production') && $this->app->runningInConsole()) {
+        //     app(Factory::class)->load(module_path('CupChart', 'Database/factories'));
+        // }
     }
 
     /**

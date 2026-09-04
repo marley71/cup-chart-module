@@ -2,6 +2,7 @@
 
 use App\Services\Importazione\RenderTableService;
 use Gecche\Cupparis\App\Breeze\Breeze;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 
 /**
@@ -94,4 +95,9 @@ class ImportazioneTabella extends Breeze
         }
         return $data;
     }
+    public function scopeSearchRestricted(Builder $q, $search,$restriction, $threshold = null, $entireText = false, $entireTextOnly = false) {
+        $q->where('nome', 'like', '%'.$search.'%');
+        return $this->scopeSearchRestricted($q, $search, $restriction, $threshold, $entireText, $entireTextOnly);
+    }
+    
 }

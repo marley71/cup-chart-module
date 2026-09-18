@@ -366,28 +366,23 @@ class SplitStrictTablesService
                 $finalMergeCoordinate = (explode(':', $mergeRange))[1];
                 list($finalMergeColumn, $finalMergeRow) = Coordinate::coordinateFromString($finalMergeCoordinate);
                 $finalMergeColumnIndex = Coordinate::columnIndexFromString($finalMergeColumn);
-                if ($finalMergeColumnIndex == $finalColumnIndex) {
-                    $trovato = true;
-                    break;
-                }
-                if ($finalMergeColumnIndex < $finalColumnIndex) {
-                    continue;
-                }
-
             } else {
                 $finalMergeColumnIndex = $metadataColumnIndex;
             }
 
+            $hasOtherValue = false;
             for ($nextColumnIndex = $finalMergeColumnIndex + 1; $nextColumnIndex <= $finalColumnIndex; $nextColumnIndex++) {
                 $nextColumn = Coordinate::stringFromColumnIndex($nextColumnIndex);
                 $coordinate = $nextColumn . $row;
                 $nextCell = $sheet->getCell($coordinate);
                 $value = $nextCell->getValue();
-                if (empty($value)) {
+                if ($value === null || (is_string($value) && trim($value) === '')) {
                     continue;
                 }
+                $hasOtherValue = true;
+                break;
             }
-            if ($nextColumnIndex > $finalColumnIndex) {
+            if (!$hasOtherValue) {
                 $trovato = true;
                 break;
             }
